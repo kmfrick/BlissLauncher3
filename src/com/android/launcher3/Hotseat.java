@@ -217,11 +217,15 @@ public class Hotseat extends CellLayout implements Insettable, OffsetParent {
 
         // Setting name is hardcoded here to prevent recompilation of
         // framework jar for studio build
-        Settings.Secure.putInt(getContext().getContentResolver(),
-                "bliss_launcher_dock_width",
-                dp.isVerticalBarLayout()
-                        ? getWidth() - dp.getExtraStatusBarPadding()
-                        : 0);
+        try {
+            Settings.Secure.putInt(getContext().getContentResolver(),
+                    "bliss_launcher_dock_width",
+                    dp.isVerticalBarLayout()
+                            ? getWidth() - dp.getExtraStatusBarPadding()
+                            : 0);
+        } catch (SecurityException e) {
+            // WRITE_SECURE_SETTINGS permission not available on non-system installs
+        }
     }
 
     /**

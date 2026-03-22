@@ -312,7 +312,7 @@ public class DeviceProfile {
         isTablet = info.isTablet(windowBounds);
         isPhone = !isTablet;
         isTwoPanels = isTablet && isMultiDisplay;
-        boolean isTaskBarEnabled = LineageSettings.System.getInt(context.getContentResolver(),
+        boolean isTaskBarEnabled = getLineageSetting(context,
                 LineageSettings.System.ENABLE_TASKBAR, isTablet ? 1 : 0) == 1;
         isTaskbarPresent = isTaskBarEnabled && ApiWrapper.TASKBAR_DRAWN_IN_PROCESS;
 
@@ -324,8 +324,8 @@ public class DeviceProfile {
         final Resources res = context.getResources();
         mMetrics = res.getDisplayMetrics();
 
-        isNoHintGesture = isGestural() && LineageSettings.System.getInt(
-                context.getContentResolver(), LineageSettings.System.NAVIGATION_BAR_HINT, 0) != 1;
+        isNoHintGesture = isGestural() && getLineageSetting(context,
+                LineageSettings.System.NAVIGATION_BAR_HINT, 0) != 1;
 
         // Determine sizes.
         widthPx = windowBounds.bounds.width();
@@ -1992,6 +1992,18 @@ public class DeviceProfile {
             return new DeviceProfile(mContext, mInv, mInfo, mWindowBounds, mDotRendererCache,
                     mIsMultiWindowMode, mTransposeLayoutWithOrientation, mIsMultiDisplay,
                     mIsGestureMode, mViewScaleProvider, mOverrideProvider);
+        }
+    }
+
+    /**
+     * Safely get a LineageOS setting, handling devices where the API may not be available.
+     */
+    private static int getLineageSetting(Context context, String setting, int defaultValue) {
+        try {
+            return LineageSettings.System.getInt(context.getContentResolver(), setting, defaultValue);
+        } catch (NoSuchMethodError | Exception e) {
+            // Device doesn't have the required LineageOS API
+            return defaultValue;
         }
     }
 }
