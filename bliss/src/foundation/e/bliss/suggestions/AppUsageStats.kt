@@ -10,10 +10,7 @@ package foundation.e.bliss.suggestions
 import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.provider.Settings
-import android.widget.Toast
 import com.android.launcher3.R
 import foundation.e.bliss.utils.Logger
 import java.util.Calendar
@@ -49,14 +46,16 @@ class AppUsageStats(private val mContext: Context) {
                 }
             }
 
+            // PACKAGE_USAGE_STATS is a special permission that requires user to enable
+            // it in Settings. We cannot request it like a normal runtime permission.
+            // Just return empty stats if not granted - the app will show all apps instead
+            // of usage-based suggestions.
             if (
                 mContext.checkCallingOrSelfPermission(
                     android.Manifest.permission.PACKAGE_USAGE_STATS
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                Logger.i(TAG, "The user may not allow the access to apps usage.")
-                Toast.makeText(mContext, "Permission not allowed!", Toast.LENGTH_LONG).show()
-                mContext.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+                Logger.i(TAG, "Usage stats permission not granted, returning empty stats")
             } else if (aggregatedStats.isNotEmpty()) {
                 val statsMap = aggregatedStats.entries
 
